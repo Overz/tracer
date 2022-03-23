@@ -1,0 +1,8 @@
+node_modules
+build
+dist
+dockerfile*
+.eslintrc.js
+*.env*
+*.log
+*.bat

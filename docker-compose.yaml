@@ -1,0 +1,55 @@
+version: '3.9'
+
+services:
+  # app:
+  #   build:
+  #     context: ./app
+  #     dockerfile: dockerfile
+  #   restart: always
+  #   hostname: app-srv
+  #   environment:
+  #     DEBUG: 'false'
+  #     PORT: '3000'
+  #     APP_NAME: 'TRACKER'
+  #     VERSIONS: 'V1,V2'
+  #     MAX_REQUEST: '50'
+  #     MAX_REQUEST_TIMEOUT: '10s'
+  #     LOG_COLORED: 'true'
+  #     LOG_FILE_NAME: '$APP_NAME'
+  #     LOG_LEVEL: 'info'
+  #     LOG_MAX_FILES: '5'
+  #     LOG_MAX_SIZE: '10mb'
+  #     LOG_PATH: '/app/logs'
+  #   ports:
+  #     - 3000:3000
+  #   expose:
+  #     - 3000
+  #   networks:
+  #     app:
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: always
+    hostname: prometheus-srv
+    command: [--config.file=/etc/prometheus/prometheus.yaml]
+    volumes:
+      - prometheus:/prometheus
+      - ./metrics/prometheus.yaml:/etc/prometheus/prometheus.yaml
+    ports:
+      - 9090:9090
+    expose:
+      - 9090
+    networks:
+      app:
+
+networks:
+  app:
+    name: app
+
+volumes:
+  app:
+    name: app
+  prometheus:
+    name: prometheus
+  grafana:
+    name: grafana

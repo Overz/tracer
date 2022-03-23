@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "baseUrl": "./src",
+    "paths": {
+      "@routes": ["routes/index", "routes"],
+      "@routes/*": ["routes/*"],
+      "@middlewares": ["middlewares/index", "middlewares"],
+      "@utils": ["utils/index", "utils"],
+      "@services": ["services/index", "services"],
+      "@services/*": ["services/*"],
+      "@errors": ["errors/index", "errors"],
+      "@errors/*": ["errors/*"]
+    },
+    "outDir": "./build",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/(spec|test).ts"]
+}
