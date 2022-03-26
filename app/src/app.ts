@@ -32,7 +32,7 @@ const server = (): Express => {
     })
   );
 
-  app.use(`/v1/${APP_NAME_LOWERED}`, routes);
+  app.use(`/${APP_NAME_LOWERED}/v1`, routes);
   app.use('/logs', express.static(LOGS_PATH));
 
   app.all('*', notFoundHandler);

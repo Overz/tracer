@@ -31,7 +31,6 @@ declare global {
   namespace Express {
     interface Request {
       uuid: string;
-      start: number;
     }
   }
 }

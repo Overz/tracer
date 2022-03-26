@@ -12,9 +12,7 @@ import {
   counterMetricsRouter,
   gaugeMetricsRouter,
   histogramMetricsRouter,
-  defaultMetricsRouter,
   customMetricsRouter,
-  gatewayRouter,
   resetMetricsRouter,
   summaryMetricsRouter,
 } from '@routes/metrics';
@@ -23,9 +21,7 @@ const metrics = (): Router[] => [
   counterMetricsRouter,
   gaugeMetricsRouter,
   histogramMetricsRouter,
-  defaultMetricsRouter,
   customMetricsRouter,
-  gatewayRouter,
   resetMetricsRouter,
   summaryMetricsRouter,
 ];

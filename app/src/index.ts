@@ -3,12 +3,7 @@ import { config } from 'dotenv';
 import { expand } from 'dotenv-expand';
 import { resolve } from 'path';
 import { ENV, envs, LOGS_PATH } from '@utils';
-import {
-  setupLogger,
-  logger,
-  removeLogs,
-  metricsCounterCriticalError,
-} from '@services';
+import { setupLogger, logger, removeLogs, metricsCounter } from '@services';
 import { setupMetrics } from 'metrics';
 
 const start = async (): Promise<void> => {
@@ -61,12 +56,13 @@ const start = async (): Promise<void> => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const exit = (msg: string, err?: any): void => {
   if (logger) {
-    logger.error(msg, { err });
+    const label = (msg.match(/\[\w+\]/gi) as RegExpMatchArray)[0];
+    logger.error(msg.replace(`${label} `, ''), { err, label });
   } else {
     console.error(msg, '\n', err);
   }
 
-  metricsCounterCriticalError.inc(1);
+  metricsCounter.inc({ counter_unmaped_error: `${err.name}` }, 1);
 
   process.exit(1);
 };

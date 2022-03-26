@@ -1,28 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
 import {
   logger,
-  metricsCounterAppError,
-  metricsCounterInternalError,
-  metricsCounterNotFoundError,
-  metricsCounterTotalErrors,
+  metricsCounter,
+  metricsGauge,
+  metricsHistogram,
 } from '@services';
-import { getMedatada, shouldSkipRequest } from './track';
-import {
-  AppError,
-  BadRequestError,
-  NotAuthorizedError,
-  NotFoundError,
-} from '@errors';
+import { getMedatada } from './track';
+import { AppError, NotFoundError } from '@errors';
 import { Indexable } from '@utils';
+import { shouldSkipRequest } from './utils';
 
 const internalError = 'Internal Server Error';
-
-const errors = {
-  [AppError.name]: internalError,
-  [NotFoundError.name]: internalError,
-  [BadRequestError.name]: 'Bad Request Error',
-  [NotAuthorizedError.name]: 'Not Authorized Error',
-};
 
 export const errorHandler = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -36,25 +24,31 @@ export const errorHandler = (
     return next();
   }
 
-  metricsCounterTotalErrors.inc(1);
-
   const meta = {
-    label: '[APP]',
+    label: '[ERROR]',
     meta: getMedatada(req),
   };
 
+  const errname = err.name;
+
   if (err instanceof AppError) {
-    metricsCounterAppError.inc(1);
+    const { statusCode, serialize } = err;
+    const { message, errors } = serialize();
 
-    logger.warn(errors[err.name], meta);
+    logger.warn(message, meta);
 
-    return res.status(err.statusCode).send(err.serialize());
+    // metricsCounter.inc({ error_total: errname, status_total: statusCode }, 1);
+    // metricsHistogram.observe({ app_error: errname }, 1);
+    // metricsGauge.inc({ gauge_app_error: errname }, 1);
+
+    return res.status(statusCode).send({ message, errors });
   }
-
-  metricsCounterInternalError.inc(1);
 
   delete err.message;
   logger.error(internalError, { ...meta, err });
+
+  // metricsCounter.inc({ error_unmaped_total: errname }, 1);
+  // metricsGauge.inc({ gauge_unmaped_error: errname }, 1);
 
   res.status(500).send({ message: internalError });
 };
@@ -67,8 +61,6 @@ export const notFoundHandler = (
   if (shouldSkipRequest(req.url)) {
     return next();
   }
-
-  metricsCounterNotFoundError.inc(1);
 
   logger.warn('request not found!', {
     label: '[REQUEST]',

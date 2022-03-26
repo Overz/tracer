@@ -1,7 +1,6 @@
 import {
   Pushgateway,
   Registry,
-  register as defaultRegister,
   Metric,
   Counter,
   Gauge,
@@ -31,6 +30,11 @@ export class MetricsService {
       prefix: APP_NAME_LOWERED,
     });
   }
+
+  getMetricData = async (): Promise<MetricsData> => ({
+    data: await this.register.metrics(),
+    contenttype: this.register.contentType,
+  });
 
   private getData = async (
     name: string,
@@ -63,18 +67,13 @@ export class MetricsService {
     return g;
   };
 
-  addMetric = (metric: Metric<string>): MetricsService => {
-    this.register.registerMetric(metric);
-    return this;
-  };
-
-  addAllMetrics = (...metrics: Metric<string>[]): void => {
+  addCustomMetrics = (...metrics: Metric<string>[]): void => {
     for (const metric of metrics) {
       this.register.registerMetric(metric);
     }
   };
 
-  getMetric = (name: string): Metric<string> => {
+  private getOneMetric = (name: string): Metric<string> => {
     const m = this.register.getSingleMetric(name);
 
     if (!m) {
@@ -88,36 +87,30 @@ export class MetricsService {
     this.register.removeSingleMetric(name);
   };
 
-  getMetricData = async (name: string): Promise<MetricsData> =>
-    await this.getData(name, this.register);
-
-  getDefaultMetricsData = async (name: string): Promise<MetricsData> =>
-    await this.getData(name, defaultRegister);
-
   resetMetrics = (): void => this.register.resetMetrics();
 
   removeAllMetrics = (): void => this.register.clear();
 
   getCounter = (name: string): Counter<string> =>
-    this.getMetric(name) as Counter<string>;
+    this.getOneMetric(name) as Counter<string>;
 
   getCounterData = async (name: string): Promise<MetricsData> =>
     await this.getData(name, this.register);
 
   getGauge = (name: string): Gauge<string> =>
-    this.getMetric(name) as Gauge<string>;
+    this.getOneMetric(name) as Gauge<string>;
 
   getGaugeData = async (name: string): Promise<MetricsData> =>
     await this.getData(name, this.register);
 
   getHistogram = (name: string): Histogram<string> =>
-    this.getMetric(name) as Histogram<string>;
+    this.getOneMetric(name) as Histogram<string>;
 
   getHistogramData = async (name: string): Promise<MetricsData> =>
     await this.getData(name, this.register);
 
   getSummary = (name: string): Summary<string> =>
-    this.getMetric(name) as Summary<string>;
+    this.getOneMetric(name) as Summary<string>;
 
   getSummaryData = async (name: string): Promise<MetricsData> =>
     await this.getData(name, this.register);

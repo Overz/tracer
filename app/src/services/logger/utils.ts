@@ -5,6 +5,13 @@ import fs from 'fs/promises';
 import { logger } from './logger';
 import { Format } from 'logform';
 
+interface Printf {
+  level: string;
+  message: string;
+  label: string;
+  metadata: Indexable;
+}
+
 const { colorize, combine, metadata, printf } = winstonFormartter;
 
 const meta = metadata({
@@ -23,12 +30,13 @@ const sanitizeLevel = (level: string): string => {
   return level;
 };
 
-const print = printf(({ level, message, label, metadata }) => {
+const print = printf((info) => {
+  const { label, level, message, metadata } = info as Printf;
+
   let msg = `${sanitizeLevel(level)}: ts="${new Date().toISOString()}" `;
 
   msg +=
     label && !message.match(/label=".*"/gi) ? `label="${label}" ` : message;
-
   msg += !message.match(/msg=".*"/gi) ? `msg="${message}" ` : message;
 
   if (metadata && JSON.stringify(metadata) !== '{}') {

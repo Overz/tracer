@@ -1,6 +1,6 @@
 import { AppError, Serialize } from './app-error';
 
-const message = 'Not found';
+const message = 'Not Found';
 
 export class NotFoundError extends AppError {
   statusCode = 404;
