@@ -3,7 +3,7 @@ import { config } from 'dotenv';
 import { expand } from 'dotenv-expand';
 import { resolve } from 'path';
 import { ENV, envs, LOGS_PATH } from '@utils';
-import { setupLogger, logger, removeLogs, metricsCounter } from '@services';
+import { setupLogger, logger, removeLogs } from '@services';
 import { setupMetrics } from 'metrics';
 
 const start = async (): Promise<void> => {
@@ -61,8 +61,6 @@ const exit = (msg: string, err?: any): void => {
   } else {
     console.error(msg, '\n', err);
   }
-
-  metricsCounter.inc({ counter_unmaped_error: `${err.name}` }, 1);
 
   process.exit(1);
 };

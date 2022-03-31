@@ -1,5 +1,6 @@
 export enum MetricsId {
   HTTP_REQUEST = 'http_request',
+  HTTP_RESPONSE = 'http_response',
   HTTP_METHOD = 'http_method',
   HTTP_PAYLOAD = 'http_payload',
   HTTP_ERROR = 'http_error',
@@ -11,6 +12,7 @@ export enum MetricsId {
 
 export enum MetricsHelp {
   HTTP_REQUEST = 'http request metrics',
+  HTTP_RESPONSE = 'http request metrics',
   HTTP_METHOD = 'http method metrics',
   HTTP_PAYLOAD = 'http payload metrics',
   HTTP_ERROR = 'http error metrics',

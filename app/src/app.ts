@@ -1,8 +1,13 @@
 import 'express-async-errors';
 import express, { Express, json, urlencoded } from 'express';
-import limiter from 'express-rate-limit';
-import { errorHandler, notFoundHandler, requestTrack } from '@middlewares';
+import {
+  errorHandler,
+  notFoundHandler,
+  onRequest,
+  onResponse,
+} from '@middlewares';
 import { routes } from './routes';
+import limiter from 'express-rate-limit';
 import cors from 'cors';
 import ms from 'ms';
 import { ENV, LOGS_PATH, APP_NAME_LOWERED } from '@utils';
@@ -15,8 +20,8 @@ const server = (): Express => {
 
   app.use(json());
   app.use(cors());
-  app.use(helmet());
-  app.use(requestTrack());
+  app.use(onRequest);
+  app.use(onResponse);
   app.use(urlencoded({ extended: true }));
   app.use(
     limiter({
@@ -31,6 +36,7 @@ const server = (): Express => {
       },
     })
   );
+  app.use(helmet());
 
   app.use(`/${APP_NAME_LOWERED}/v1`, routes);
   app.use('/logs', express.static(LOGS_PATH));

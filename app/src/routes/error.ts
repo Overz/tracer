@@ -2,8 +2,8 @@ import { Router } from 'express';
 
 const router = Router();
 
-router.get('/hello/error', async () => {
+router.get('/error', async () => {
   throw new Error('Error accessing endpoint...');
 });
 
-export { router as helloErrorRouter };
+export { router as errorRouter };

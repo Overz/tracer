@@ -5,7 +5,6 @@ import {
   helloGetRouter,
   helloPostRouter,
   helloPutRouter,
-  helloErrorRouter,
 } from '@routes/hello';
 
 import {
@@ -16,6 +15,8 @@ import {
   resetMetricsRouter,
   summaryMetricsRouter,
 } from '@routes/metrics';
+
+import { healthCheckRouter, errorRouter } from '@routes';
 
 const metrics = (): Router[] => [
   counterMetricsRouter,
@@ -31,7 +32,9 @@ const hello = (): Router[] => [
   helloGetRouter,
   helloPostRouter,
   helloPutRouter,
-  helloErrorRouter,
+  errorRouter,
 ];
 
-export const routes: Router[] = [...hello(), ...metrics()];
+const others = (): Router[] => [healthCheckRouter, errorRouter];
+
+export const routes: Router[] = [...hello(), ...metrics(), ...others()];

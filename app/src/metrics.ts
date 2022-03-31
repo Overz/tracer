@@ -1,6 +1,15 @@
-import { metrics, metricsCounter, metricsHistogram } from '@services';
-import { metricsGauge } from '@services/metrics/registers/gauges';
+import {
+  metrics,
+  metricsCounterRequestReceived,
+  metricsHistogram,
+  metricsGauge,
+  metricsSummary,
+} from '@services';
 
 export const setupMetrics = (): void => {
-  metrics.addCustomMetrics(metricsCounter, metricsHistogram, metricsGauge);
+  metrics.addCustomMetrics(
+    metricsCounterRequestReceived
+    // metricsHistogram,
+    // metricsGauge
+  );
 };
