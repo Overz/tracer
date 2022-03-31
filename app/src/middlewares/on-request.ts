@@ -1,7 +1,16 @@
-import { logger, metricsCounterRequestReceived } from '@services';
+import {
+  logger,
+  metricsCounterRequest,
+  metricsCounterResponse,
+} from '@services';
 import { Request, Response, NextFunction } from 'express';
 import { nanoid } from 'nanoid';
-import { getMedatada, hasPayload, shouldSkipRequest } from './utils';
+import {
+  getMedatada,
+  hasRequestData,
+  hasResponseData,
+  shouldSkipRequest,
+} from './utils';
 
 const CORRELATION_ID = 20;
 const TRACK_ID = 'X-Correlation-Id';
@@ -16,14 +25,12 @@ export const onRequest = (
   }
 
   const { method, url: handler } = req;
-  const payload = `${hasPayload(req)}`;
+  const payload = `${hasRequestData(req)}`;
 
-  metricsCounterRequestReceived.inc({ method, handler, payload }, 1);
+  metricsCounterRequest.inc({ method, handler, payload }, 1);
 
   const correlationId = (req.headers[TRACK_ID] ||
     nanoid(CORRELATION_ID)) as string;
-
-  console.log({ correlationId });
 
   req.uuid = correlationId;
   req.headers[TRACK_ID] = correlationId;
@@ -34,5 +41,19 @@ export const onRequest = (
     label: '[REQUEST]',
   });
 
+  res.on('finish', () => onResponse(req, res));
+
   next();
+};
+
+const onResponse = (req: Request, res: Response): void => {
+  logger.info('request finished!', { label: '[REQUEST]' });
+
+  const { method, originalUrl: handler } = req;
+  const { statusCode: status } = res;
+  const payload = `${hasResponseData(res)}`;
+
+  const counter = { method, handler, payload, status };
+
+  metricsCounterResponse.inc(counter, 1);
 };

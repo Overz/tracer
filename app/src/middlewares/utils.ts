@@ -1,5 +1,5 @@
-import { isEmptyObject } from '@utils';
-import { Request } from 'express';
+import { Indexable, isEmptyObject } from '@utils';
+import { Request, Response } from 'express';
 import { RequestMetadata } from './types';
 
 const skiped = ['/favicon.ico'];
@@ -17,5 +17,10 @@ export const getMedatada = (req: Request): RequestMetadata => ({
   querys: JSON.stringify(req.query),
 });
 
-export const hasPayload = ({ body, query, params }: Request): boolean =>
-  isEmptyObject(body) && isEmptyObject(params) && isEmptyObject(query);
+export const hasRequestData = ({ body, query, params }: Request): boolean =>
+  !isEmptyObject(body) && !isEmptyObject(params) && !isEmptyObject(query);
+
+export const hasResponseData = (res: Response): boolean => {
+  const headers = res.getHeaders() as Indexable;
+  return (headers['content-length'] as number) > 0;
+};

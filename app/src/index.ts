@@ -14,7 +14,7 @@ const start = async (): Promise<void> => {
     envs();
 
     if (ENV['DEBUG']) {
-      console.log('[ENVIRONMENT] Printing:', ENV);
+      console.log('[ENVIRONMENTS] Printing:', ENV);
     }
   } catch (err) {
     exit('[ENVIRONMENTS] Error reading environments!', err);
@@ -35,6 +35,7 @@ const start = async (): Promise<void> => {
   }
 
   try {
+    logger.info('Settings up metrics...', { label: '[METRICS]' });
     setupMetrics();
   } catch (err) {
     exit('[APP] Error settings up Metrics!', err);

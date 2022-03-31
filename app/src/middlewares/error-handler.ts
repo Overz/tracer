@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import { logger, metricsCounterRequestError } from '@services';
+import { logger, metricsCounterError } from '@services';
 import { AppError } from '@errors';
 import { Indexable } from '@utils';
-import { getMedatada, hasPayload, shouldSkipRequest } from './utils';
+import { getMedatada, hasRequestData, shouldSkipRequest } from './utils';
 
 const internalErrorMessage = 'Internal Server Error';
 const internalErrorStatus = 500;
@@ -31,7 +31,7 @@ export const errorHandler = (
     method,
     handler: url,
     error: name,
-    payload: `${hasPayload(req)}`,
+    payload: `${hasRequestData(req)}`,
   };
 
   if (err instanceof AppError) {
@@ -39,7 +39,7 @@ export const errorHandler = (
     const { message, errors } = serialize();
 
     logger.warn(message, meta);
-    metricsCounterRequestError.inc({ ...counterReq, status: statusCode });
+    metricsCounterError.inc({ ...counterReq, status: statusCode });
 
     return res.status(statusCode).send({ message, errors });
   }
@@ -49,7 +49,7 @@ export const errorHandler = (
   logger.error(internalErrorMessage, { ...meta, err });
 
   // metrics
-  metricsCounterRequestError.inc({
+  metricsCounterError.inc({
     ...counterReq,
     status: internalErrorStatus,
   });

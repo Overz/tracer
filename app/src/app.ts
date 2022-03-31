@@ -1,11 +1,6 @@
 import 'express-async-errors';
 import express, { Express, json, urlencoded } from 'express';
-import {
-  errorHandler,
-  notFoundHandler,
-  onRequest,
-  onResponse,
-} from '@middlewares';
+import { errorHandler, notFoundHandler, onRequest } from '@middlewares';
 import { routes } from './routes';
 import limiter from 'express-rate-limit';
 import cors from 'cors';
@@ -21,7 +16,6 @@ const server = (): Express => {
   app.use(json());
   app.use(cors());
   app.use(onRequest);
-  app.use(onResponse);
   app.use(urlencoded({ extended: true }));
   app.use(
     limiter({

@@ -1,14 +1,13 @@
 import {
   metrics,
-  metricsCounterRequestReceived,
-  metricsHistogram,
-  metricsGauge,
-  metricsSummary,
+  metricsCounterRequest,
+  metricsCounterResponse,
 } from '@services';
 
 export const setupMetrics = (): void => {
   metrics.addCustomMetrics(
-    metricsCounterRequestReceived
+    metricsCounterRequest,
+    metricsCounterResponse
     // metricsHistogram,
     // metricsGauge
   );
