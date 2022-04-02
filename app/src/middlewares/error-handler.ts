@@ -12,7 +12,6 @@ export const errorHandler = (
   err: any,
   req: Request,
   res: Response,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction
 ): Response<Indexable, Record<string, Indexable>> | undefined | void => {
   if (shouldSkipRequest(req.url)) {
@@ -27,33 +26,30 @@ export const errorHandler = (
 
   const { name } = err;
 
-  const counterReq = {
+  const counter = {
     method,
-    handler: url,
+    url,
     error: name,
     payload: `${hasRequestData(req)}`,
   };
 
   if (err instanceof AppError) {
-    const { statusCode, serialize } = err;
+    const { statusCode: status, serialize } = err;
     const { message, errors } = serialize();
 
     logger.warn(message, meta);
-    metricsCounterError.inc({ ...counterReq, status: statusCode });
+    metricsCounterError.inc({ ...counter, status });
 
-    return res.status(statusCode).send({ message, errors });
+    return res.status(status).send({ message, errors });
   }
 
-  // loger
   delete err.message;
   logger.error(internalErrorMessage, { ...meta, err });
 
-  // metrics
   metricsCounterError.inc({
-    ...counterReq,
+    ...counter,
     status: internalErrorStatus,
   });
 
-  // final
   res.status(internalErrorStatus).send({ message: internalErrorMessage });
 };

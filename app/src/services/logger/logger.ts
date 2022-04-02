@@ -8,6 +8,7 @@ import {
 } from './types';
 import { loggerFormatter } from './utils';
 import bytes from 'bytes';
+import { dateFormat } from 'utils/date';
 
 export let logger: Logger;
 
@@ -20,6 +21,7 @@ type LoggerOptions = {
   level: LogLevel;
   silent?: boolean;
   exitOnError?: ExitOnError;
+  eol?: string;
 };
 
 export const setupLogger = ({
@@ -31,19 +33,23 @@ export const setupLogger = ({
   level,
   silent = false,
   exitOnError = false,
+  eol = '\n',
 }: LoggerOptions): Logger => {
   const fileOpts: typeof FileTransportOptions = {
     maxsize: bytes(maxsize),
     format: loggerFormatter(false),
     maxFiles,
+    eol,
   };
+
+  const [today] = dateFormat(new Date(), { pattern: 'ddMMyyyy' });
 
   fileName = fileName.toLowerCase();
 
-  const date = new Date();
-  const today = `${date.getDate()}0${date.getMonth() + 1}${date.getFullYear()}`;
-
-  const consoleTransporter = new Console({ format: loggerFormatter(colored) });
+  const consoleTransporter = new Console({
+    format: loggerFormatter(colored),
+    eol,
+  });
 
   logger = createLogger({
     silent,

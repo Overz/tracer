@@ -5,23 +5,35 @@ import { resolve } from 'path';
 import { ENV, envs, LOGS_PATH } from '@utils';
 import { setupLogger, logger, removeLogs } from '@services';
 import { setupMetrics } from 'metrics';
+import { getMessageLabel } from '@services/logger/utils';
 
 const start = async (): Promise<void> => {
+  const pendings: string[] = [];
+
   try {
-    console.log('[ENVIRONMENTS] Reading environments...');
+    let msg = '[ENVIRONMENTS] Reading environments...';
+    console.log(msg);
+    pendings.push(msg);
+
     expand(config({ path: resolve(__dirname, '..', '.env') }));
 
     envs();
 
     if (ENV['DEBUG']) {
-      console.log('[ENVIRONMENTS] Printing:', ENV);
+      msg = '[ENVIRONMENTS] Printing';
+      pendings.push(msg);
+      console.log(msg, ENV);
     }
   } catch (err) {
     exit('[ENVIRONMENTS] Error reading environments!', err);
   }
 
   try {
-    console.log('[LOGGER] Settings up logger...');
+    const msg = '[LOGGER] Settings up logger...';
+    pendings.push(msg);
+
+    console.log(msg);
+
     setupLogger({
       colored: ENV['LOG_COLORED'],
       fileName: ENV['LOG_FILE_NAME'],
@@ -29,6 +41,11 @@ const start = async (): Promise<void> => {
       maxFiles: ENV['LOG_MAX_FILES'],
       maxsize: ENV['LOG_MAX_SIZE'],
       path: LOGS_PATH,
+    });
+
+    pendings.forEach((msg) => {
+      const [text, label] = getMessageLabel(msg);
+      logger.info(text, { label });
     });
   } catch (err) {
     exit('[LOGGER] Error setting up logger!', err);
@@ -57,8 +74,8 @@ const start = async (): Promise<void> => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const exit = (msg: string, err?: any): void => {
   if (logger) {
-    const label = (msg.match(/\[\w+\]/gi) as RegExpMatchArray)[0];
-    logger.error(msg.replace(`${label} `, ''), { err, label });
+    const [text, label] = getMessageLabel(msg);
+    logger.error(text, { err, label });
   } else {
     console.error(msg, '\n', err);
   }

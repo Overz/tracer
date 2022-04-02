@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { VariableAccessors } from 'env-var';
 
-export type Indexable = { [key: string]: any };
+export type Indexable = Record<string, any>;
+
+export type TypedIndexable<K extends string> = Record<K, any>;
+
+export type PartialsIndexable<K extends string> = Partial<
+  Record<K, string | number>
+>;
 
 export type EnvKeys =
   | 'DEBUG'

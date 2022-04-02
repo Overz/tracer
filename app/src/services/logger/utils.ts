@@ -125,6 +125,12 @@ const metaPropertyFormart = (msg: string, meta: Indexable): string => {
   return msg;
 };
 
+export const getMessageLabel = (msg: string): [string, string] => {
+  const label = (msg.match(/\[\w+\]/gi) as RegExpMatchArray)[0];
+  const tmp = msg.replace(`${label} `, '');
+  return [tmp, label];
+};
+
 export const removeLogs = async (path: string): Promise<void> => {
   if (!ENV['DEBUG']) {
     throw new Error(`Tried to delete logs without debugging`);
