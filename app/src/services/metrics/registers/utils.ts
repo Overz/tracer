@@ -1,14 +1,19 @@
-import { MetricsCounterLabels } from './types';
+import { PartialsIndexable } from '@utils';
+import { MetricsLabels } from './types';
 
-export const labels = (): MetricsCounterLabels[] => [
+export const labels = (): Required<MetricsLabels>[] => [
   'method',
   'url',
   'payload',
   'isUser',
   'status',
   'error',
+  'label',
+  'type',
 ];
 
-export const buckets = (): number[] => [
-  0.2, 0.5, 1, 1.5, 2, 2.5, 3, 5, 8, 10, 20,
-];
+export const buckets = (): number[] => [2.0, 5.0, 7.0, 10.0, 20.0];
+
+export const getMetricsLabels = (
+  meta: PartialsIndexable<MetricsLabels>
+): PartialsIndexable<MetricsLabels> => meta;

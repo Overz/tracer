@@ -1,74 +1,25 @@
-import {
-  getMetricsCounterLabels,
-  getMetricsHistogramLabels,
-  logger,
-  metricsCounterRequest,
-  metricsCounterResponse,
-  metricsHistogramRequest,
-} from '@services';
-import { Indexable } from '@utils';
+import { logger } from '@services';
 import { Request, Response, NextFunction } from 'express';
 import { nanoid } from 'nanoid';
-import {
-  getMedatada,
-  hasRequestData,
-  hasResponseData,
-  shouldSkipRequest,
-} from './utils';
+import { startTrackMetrics, stopTrackMetrics } from './metrics';
+import { getMedatada, shouldSkipRequest } from './utils';
 
 const CORRELATION_ID = 20;
 const TRACK_ID = 'X-Correlation-Id';
-
-type ToStop = 'histogram';
-
-type StopFunctions = {
-  [K in ToStop as `stop${Capitalize<K>}`]: (
-    labels?: Partial<Record<string, string | number>> | undefined
-  ) => void;
-};
-
-const startTrackMetrics = (metrics: Indexable): StopFunctions => {
-  const counter = getMetricsCounterLabels(metrics);
-  const histogram = getMetricsHistogramLabels(metrics);
-
-  const counterLabels = metricsCounterRequest.labels(counter);
-  counterLabels.inc(1);
-
-  const histLabels = metricsHistogramRequest.labels(histogram);
-  histLabels.observe(1);
-
-  return {
-    stopHistogram: histLabels.startTimer(),
-  };
-};
-
-const stopTrackMetrics = (metrics: Indexable, toStop: StopFunctions): void => {
-  const { stopHistogram } = toStop;
-
-  const histogram = getMetricsHistogramLabels(metrics);
-
-  const n = stopHistogram(histogram);
-  console.log({ n });
-};
 
 export const onRequest = (
   req: Request,
   res: Response,
   next: NextFunction
 ): void => {
-  const { method, url } = req;
-
-  if (shouldSkipRequest(url)) {
+  if (shouldSkipRequest(req.url)) {
     return next();
   }
-
-  const metrics = { method, url, payload: `${hasRequestData(req)}` };
-
-  const toStop = startTrackMetrics(metrics);
 
   const correlationId = (req.headers[TRACK_ID] ||
     nanoid(CORRELATION_ID)) as string;
 
+  req.isError = false;
   req.uuid = correlationId;
   req.headers[TRACK_ID] = correlationId;
   res.set({ [TRACK_ID]: correlationId });
@@ -78,26 +29,28 @@ export const onRequest = (
     label: '[REQUEST]',
   });
 
-  res.on('finish', () => onResponse(req, res, metrics, toStop));
+  const toStop = startTrackMetrics(req);
+  res.on('finish', () => stopTrackMetrics(req, res, toStop));
 
   next();
 };
 
-const onResponse = (
-  req: Request,
-  res: Response,
-  metrics: Indexable,
-  toStop: StopFunctions
-): void => {
-  logger.info('request finished!', { label: '[REQUEST]' });
+// type StopFunctionsMap = {
+//   [key: string]: StopLabels[];
+// };
 
-  metrics = {
-    ...metrics,
-    payload: `${hasResponseData(res)}`,
-    status: res.statusCode,
-  };
+// const a = (m: any): StopFunctionsMap => {
+//   const histLabels = metricsHistogramRequest.labels(m);
+//   histLabels.observe(1);
 
-  stopTrackMetrics(metrics, toStop);
+//   return {
+//     [m]: [histLabels.startTimer()],
+//   };
+// }
 
-  metricsCounterResponse.inc(metrics, 1);
-};
+// const b = (m: any, toStop: StopFunctionsMap): void => {
+//   const functions = toStop[m]
+//   for (const fn of functions) {
+//       fn(m);
+//   }
+// }

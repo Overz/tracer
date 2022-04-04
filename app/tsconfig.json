@@ -32,6 +32,7 @@
       "@routes": ["routes/index", "routes"],
       "@routes/*": ["routes/*"],
       "@middlewares": ["middlewares/index", "middlewares"],
+      "@middlewares/*": ["middlewares/*"],
       "@utils": ["utils/index", "utils"],
       "@services": ["services/index", "services"],
       "@services/*": ["services/*"],

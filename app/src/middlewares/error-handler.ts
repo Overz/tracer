@@ -1,11 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
-import { logger, metricsCounterError } from '@services';
+import { logger } from '@services';
 import { AppError } from '@errors';
 import { Indexable } from '@utils';
-import { getMedatada, hasRequestData, shouldSkipRequest } from './utils';
-
-const internalErrorMessage = 'Internal Server Error';
-const internalErrorStatus = 500;
+import {
+  getMedatada,
+  internalErrorMessage,
+  internalErrorStatus,
+  shouldSkipRequest,
+} from './utils';
+import { errorTrackMetrics } from './metrics/error';
 
 export const errorHandler = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,38 +21,27 @@ export const errorHandler = (
     return next();
   }
 
-  const { method, url, ...rest } = getMedatada(req);
   const meta = {
     label: '[ERROR]',
-    meta: { method, url, ...rest },
-  };
-
-  const { name } = err;
-
-  const counter = {
-    method,
-    url,
-    error: name,
-    payload: `${hasRequestData(req)}`,
+    meta: getMedatada(req),
+    err,
   };
 
   if (err instanceof AppError) {
     const { statusCode: status, serialize } = err;
     const { message, errors } = serialize();
 
+    delete meta.err;
     logger.warn(message, meta);
-    metricsCounterError.inc({ ...counter, status });
+    res.status(status).send({ message, errors });
 
-    return res.status(status).send({ message, errors });
+    errorTrackMetrics(err, req, res);
+    return;
   }
 
-  delete err.message;
-  logger.error(internalErrorMessage, { ...meta, err });
-
-  metricsCounterError.inc({
-    ...counter,
-    status: internalErrorStatus,
-  });
+  logger.error(internalErrorMessage, meta);
 
   res.status(internalErrorStatus).send({ message: internalErrorMessage });
+
+  errorTrackMetrics(err, req, res);
 };

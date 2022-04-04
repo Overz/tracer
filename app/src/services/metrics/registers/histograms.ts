@@ -1,22 +1,17 @@
-import { PartialsIndexable } from '@utils';
 import { Histogram } from 'prom-client';
-import { MetricsHistogramLabels, MetricsHelp, MetricsId } from './types';
+import { MetricsLabels, MetricsHelp, MetricsId } from './types';
 import { buckets, labels } from './utils';
 
-export const metricsHistogramRequest = new Histogram<MetricsHistogramLabels>({
-  name: `api_${MetricsId.HTTP_REQUEST}_buckets`,
+export const metricsHistogram = new Histogram<MetricsLabels>({
+  name: `api_${MetricsId.HTTP_REQUEST}`,
   help: MetricsHelp.HTTP_REQUEST,
   labelNames: labels(),
   buckets: buckets(),
 });
 
-export const metricsHistogramResponse = new Histogram<MetricsHistogramLabels>({
-  name: 'a',
-  help: 'a',
-  labelNames: labels(),
-  buckets: buckets(),
-});
-
-export const getMetricsHistogramLabels = (
-  meta: PartialsIndexable<MetricsHistogramLabels>
-): PartialsIndexable<MetricsHistogramLabels> => meta;
+// export const metricsHistogramResponse = new Histogram<MetricsLabels>({
+//   name: `api_${MetricsId.HTTP_RESPONSE}_buckets`,
+//   help: MetricsHelp.HTTP_RESPONSE,
+//   labelNames: labels(),
+//   buckets: buckets(),
+// });

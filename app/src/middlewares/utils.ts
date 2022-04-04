@@ -2,10 +2,22 @@ import { Indexable, isEmptyObject } from '@utils';
 import { Request, Response } from 'express';
 import { RequestMetadata } from './types';
 
-const skiped = ['/favicon.ico'];
+export const internalErrorMessage = 'Internal Server Error';
+export const internalErrorStatus = 500;
 
-export const shouldSkipRequest = (url: string, toSkip = skiped): boolean =>
-  toSkip.includes(url);
+const skiped = ['/favicon.ico', '/metrics'];
+
+export const shouldSkipRequest = (url: string, toSkip = skiped): boolean => {
+  let skip = false;
+
+  for (const path of toSkip) {
+    if (url.includes(path)) {
+      skip = true;
+    }
+  }
+
+  return skip;
+};
 
 export const getMedatada = (req: Request): RequestMetadata => ({
   method: req.method,
